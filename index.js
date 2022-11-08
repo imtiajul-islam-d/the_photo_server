@@ -14,4 +14,9 @@ app.use('*', (req, res, next) => {
 })
 // custom middleware end
 // middleware end
-
+app.get('/', (req, res) => {
+    res.send('Server connected')
+})
+app.listen(port, () => {
+    console.log('Server connected')
+})
