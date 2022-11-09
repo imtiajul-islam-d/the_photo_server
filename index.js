@@ -27,85 +27,77 @@ const client = new MongoClient(uri, {
 // mongodb end
 
 // middleware end
-
 // main section start
-client.connect((err) => {
-  if (err) {
-    console.log(err);
-    return;
+const db = client.db("review");
+// Creating respective routes
+// ======================================== GET REQUEST from service only start
+app.get("/services", async (req, res) => {
+  const collection = db.collection("services");
+  const query = {};
+  const size = parseInt(req.query.size);
+  if (size) {
+    const cursor = collection.find(query);
+    const service = await cursor.limit(size).toArray();
+    if (service) {
+      res.send({
+        status: "success",
+        data: service,
+      });
+    }else{
+        res.send({
+            status: "error",
+            data: []
+        })
+    }
   } else {
-    // Now database is connected do the rest things here
-    const db = client.db("review");
-    // Creating respective routes
-    // ======================================== GET REQUEST from service only start
-    app.get("/services", async (req, res) => {
-      const collection = db.collection("services");
-      const query = {};
-      const size = parseInt(req.query.size);
-      if (size) {
-        const cursor = collection.find(query);
-        const service = await cursor.limit(size).toArray();
-        if (service) {
-          res.send({
+    const cursor = collection.find(query);
+    const service = await cursor.toArray();
+    if(service){
+        res.send({
             status: "success",
             data: service,
           });
-        }else{
-            res.send({
-                status: "error",
-                data: []
-            })
-        }
-      } else {
-        const cursor = collection.find(query);
-        const service = await cursor.toArray();
-        if(service){
-            res.send({
-                status: "success",
-                data: service,
-              });
-        }else{
-            res.send({
-                status: "error",
-                data: []
-            })
-        }
-      }
-    });
-    // ======================================== GET REQUEST from service only end
-    // ======================================== POST REQUEST start
-    app.post("/services/create", async (req, res) => {
-      const collection = db.collection("services");
-      const query = req.body;
-      const user = await collection.insertOne(query);
-      res.send({
-        status: "success",
-        data: user,
-      });
-    });
-    // ======================================== POST REQUEST end
-    // get request with params, for specific data start
-    app.get("/services/:id", async (req, res) => {
-      const collection = db.collection("services");
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: ObjectId(id) };
-      const item = await collection.findOne(query);
-      if (item) {
+    }else{
         res.send({
-          status: "success",
-          data: item,
-        });
-      } else {
-        res.send({
-          status: "error",
-          data: [],
-        });
-      }
-    });
-    // get request with params, for specific data end
+            status: "error",
+            data: []
+        })
+    }
   }
 });
+// ======================================== GET REQUEST from service only end
+    // ======================================== POST REQUEST start
+    app.post("/services/create", async (req, res) => {
+        const collection = db.collection("services");
+        const query = req.body;
+        const user = await collection.insertOne(query);
+        res.send({
+          status: "success",
+          data: user,
+        });
+      });
+      // ======================================== POST REQUEST end
+      // get request with params, for specific data start
+      app.get("/services/:id", async (req, res) => {
+        const collection = db.collection("services");
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: ObjectId(id) };
+        const item = await collection.findOne(query);
+        if (item) {
+          res.send({
+            status: "success",
+            data: item,
+          });
+        } else {
+          res.send({
+            status: "error",
+            data: [],
+          });
+        }
+      });
+      // get request with params, for specific data end
+
 // main section end
 
 app.get("/", (req, res) => {
