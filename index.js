@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -37,7 +37,7 @@ client.connect((err) => {
     // Now database is connected do the rest things here
     const db = client.db("review");
     // Creating respective routes
-    // ======================================== GET REQUEST from home only start
+    // ======================================== GET REQUEST from service only start
     app.get("/services", async (req, res) => {
       const collection = db.collection("services");
       const query = {};
@@ -45,20 +45,34 @@ client.connect((err) => {
       if (size) {
         const cursor = collection.find(query);
         const service = await cursor.limit(size).toArray();
-        res.send({
-          status: "success",
-          data: service,
-        });
+        if (service) {
+          res.send({
+            status: "success",
+            data: service,
+          });
+        }else{
+            res.send({
+                status: "error",
+                data: []
+            })
+        }
       } else {
         const cursor = collection.find(query);
         const service = await cursor.toArray();
-        res.send({
-          status: "success",
-          data: service,
-        });
+        if(service){
+            res.send({
+                status: "success",
+                data: service,
+              });
+        }else{
+            res.send({
+                status: "error",
+                data: []
+            })
+        }
       }
     });
-    // ======================================== GET REQUEST from home only end
+    // ======================================== GET REQUEST from service only end
     // ======================================== POST REQUEST start
     app.post("/services/create", async (req, res) => {
       const collection = db.collection("services");
@@ -70,6 +84,26 @@ client.connect((err) => {
       });
     });
     // ======================================== POST REQUEST end
+    // get request with params, for specific data start
+    app.get("/services/:id", async (req, res) => {
+      const collection = db.collection("services");
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const item = await collection.findOne(query);
+      if (item) {
+        res.send({
+          status: "success",
+          data: item,
+        });
+      } else {
+        res.send({
+          status: "error",
+          data: [],
+        });
+      }
+    });
+    // get request with params, for specific data end
   }
 });
 // main section end
