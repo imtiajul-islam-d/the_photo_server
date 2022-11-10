@@ -127,6 +127,46 @@ app.get("/services", async (req, res) => {
         }
       });
       // get information for review input end (privet)
+      // find review with id
+      app.get("/getReview/:id", async (req, res) => {
+        const collection = db.collection("userReview");
+        const id = req.params.id;
+        const query = {serviceId: id};
+        const reviews = await collection.find(query).toArray();
+        if(reviews){
+          res.send({
+            status: "success",
+            data: reviews
+          })
+        }else{
+          res.send({
+            status: "error",
+            data: []
+          })
+        }
+      })
+      // find review with id
+
+      // get information for review input start (privet)
+      app.get("/getMyReview/:email", async (req, res) => {
+        const collection = db.collection("userReview");
+        const email = req.params.email;
+        console.log(email);
+        const query = {userEmail : email};
+        const reviews = await collection.find(query).toArray();
+        if (reviews) {
+          res.send({
+            status: "success",
+            data: reviews,
+          });
+        } else {
+          res.send({
+            status: "error",
+            data: [],
+          });
+        }
+      });
+      // get information for review input end (privet)
 
 // main section end
 
