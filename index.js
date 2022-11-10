@@ -77,6 +77,17 @@ app.get("/services", async (req, res) => {
         });
       });
       // ======================================== POST REQUEST end
+    // ======================================== POST review start
+    app.post("/review/create", async (req, res) => {
+        const collection = db.collection("userReview");
+        const query = req.body;
+        const user = await collection.insertOne(query);
+        res.send({
+          status: "success",
+          data: user,
+        });
+      });
+      // ======================================== POST review end
       // get request with params, for specific data start
       app.get("/services/:id", async (req, res) => {
         const collection = db.collection("services");
@@ -97,6 +108,25 @@ app.get("/services", async (req, res) => {
         }
       });
       // get request with params, for specific data end
+      // get information for review input start (privet)
+      app.get("/addReview/:id", async (req, res) => {
+        const collection = db.collection("services");
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const item = await collection.findOne(query);
+        if (item) {
+          res.send({
+            status: "success",
+            data: item,
+          });
+        } else {
+          res.send({
+            status: "error",
+            data: [],
+          });
+        }
+      });
+      // get information for review input end (privet)
 
 // main section end
 
