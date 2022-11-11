@@ -192,6 +192,27 @@ app.get("/services", async (req, res) => {
           });
         }
       });
+      // delete service
+      // get information for review input end (privet)
+      app.delete("/deleteService/:id", async (req, res) => {
+        const collection = db.collection("services");
+        const id = req.params.id;
+        console.log(id);
+        const query = {_id : ObjectId(id)};
+        const result = await collection.deleteOne(query);
+        if (result.deletedCount === 1) {
+          res.send({
+            status: "Successfully deleted one document.",
+            data: result
+          })
+          console.log("Successfully deleted one document.");
+        } else {
+          res.send({
+            status: 'No data matched!',
+            data: []
+          })
+        }
+      });
       // get information for review input end (privet)
       app.delete("/delete/:id", async (req, res) => {
         const collection = db.collection("userReview");
