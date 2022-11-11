@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const jwt = require('jsonwebtoken')
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -9,10 +10,32 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 // custom middleware start
-app.use("*", (req, res, next) => {
-  console.log(req.url);
-  next();
-});
+
+  app.post('/jwt', (req, res) => {
+    const user = req.body
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+    res.send({token})
+    // console.log(user)
+  })
+  
+
+
+function verifyJWT(req, res, next){
+  const authHeader = req.headers.authorization
+  if(!authHeader){
+    return res.status(401).send({
+      message: "unauthorized access" 
+    })
+  }
+  const token = authHeader.split(' ')[1]
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
+    if(err){
+      return res.status(403).send({message: 'unauthorized access'})
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
 // custom middleware end
 
 // mongodb start
@@ -92,7 +115,6 @@ app.get("/services", async (req, res) => {
       app.get("/services/:id", async (req, res) => {
         const collection = db.collection("services");
         const id = req.params.id;
-        console.log(id);
         const query = { _id: ObjectId(id) };
         const item = await collection.findOne(query);
         if (item) {
@@ -129,6 +151,7 @@ app.get("/services", async (req, res) => {
       // get information for review input end (privet)
       // find review with id
       app.get("/getReview/:id", async (req, res) => {
+  
         const collection = db.collection("userReview");
         const id = req.params.id;
         const query = {serviceId: id};
@@ -148,10 +171,13 @@ app.get("/services", async (req, res) => {
       // find review with id
 
       // get information for review input start (privet)
-      app.get("/getMyReview/:email", async (req, res) => {
+      app.get("/getMyReview/:email", verifyJWT, async (req, res) => {
         const collection = db.collection("userReview");
         const email = req.params.email;
-        console.log(email);
+        const decoded = req.decoded;
+        if(decoded.email !== req.params.email){
+            return res.status(403).send({message: 'unauthorized access'})
+        }
         const query = {userEmail : email};
         const reviews = await collection.find(query).toArray();
         if (reviews) {
