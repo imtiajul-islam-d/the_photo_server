@@ -179,7 +179,7 @@ app.get("/services", async (req, res) => {
             return res.status(403).send({message: 'unauthorized access'})
         }
         const query = {userEmail : email};
-        const reviews = await collection.find(query).toArray();
+        const reviews = await collection.find(query).sort({time: -1}).toArray();
         if (reviews) {
           res.send({
             status: "success",
