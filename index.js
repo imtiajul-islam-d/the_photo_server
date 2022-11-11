@@ -213,7 +213,25 @@ app.get("/services", async (req, res) => {
         }
       });
       // delete review
-      // 
+      // update review start
+      app.put('/reviewUpdate/:id', async(req, res) => {
+        const collection = db.collection("userReview");
+        const id = req.params.id;
+        console.log(id)
+        const filter = {_id: ObjectId(id)}
+        const updatedReview = req.body;
+        const option = {upsert: true};
+        const updatedDoc = {
+          $set: {
+            reviewText : updatedReview.changes
+          }
+        }
+        const result = await collection.updateOne(filter, updatedDoc, option)
+        res.send(result)
+        console.log(updatedReview);
+
+      })
+      // update review end 
 
 // main section end
 
