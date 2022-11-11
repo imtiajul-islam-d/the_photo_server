@@ -155,7 +155,7 @@ app.get("/services", async (req, res) => {
         const collection = db.collection("userReview");
         const id = req.params.id;
         const query = {serviceId: id};
-        const reviews = await collection.find(query).toArray();
+        const reviews = await collection.find(query).sort({time: -1}).toArray();
         if(reviews){
           res.send({
             status: "success",
